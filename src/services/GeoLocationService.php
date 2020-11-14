@@ -31,7 +31,7 @@ class GeoLocationService extends Component
 	// Consts
 	// =========================================================================
 
-	const DB_STORAGE = '@runtime/maps/db';
+	const DB_STORAGE = '@storage/maps/db';
 
 	const None = 'none';
 	const IpStack = 'ipstack';
