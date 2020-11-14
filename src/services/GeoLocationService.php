@@ -190,43 +190,6 @@ class GeoLocationService extends Component
 		);
 	}
 
-	/**
-	 * Should we update the database (is it older than 1 week?)
-	 *
-	 * @param string $filename
-	 *
-	 * @return bool
-	 * @throws Exception
-	 */
-	public static function dbShouldUpdate ($filename = 'default.mmdb')
-	{
-		$updated = filemtime(
-			Craft::getAlias(self::DB_STORAGE . DIRECTORY_SEPARATOR . $filename)
-		);
-
-		if ($updated === false) return false;
-		return $updated < (new \DateTime())->modify('-7 days')->getTimestamp();
-	}
-
-	/**
-	 * Start the MaxMind DB download job
-	 */
-	public static function dbQueueDownload ()
-	{
-		if (Craft::$app->getCache()->get('maps_db_updating'))
-			return;
-
-		Craft::$app->getCache()->set('maps_db_updating', true);
-		Craft::$app->getQueue()->push(new MaxMindDBDownloadJob());
-	}
-
-	public static function purgeDb ($filename = 'default.mmdb')
-	{
-		$file = Craft::getAlias(self::DB_STORAGE . DIRECTORY_SEPARATOR . $filename);
-
-		if (file_exists($file))
-			unlink($file);
-	}
 
 	// Private Helpers
 	// =========================================================================
@@ -339,13 +302,8 @@ class GeoLocationService extends Component
 	{
 		if (!self::dbExists())
 		{
-			self::dbQueueDownload();
-
-			throw new Exception('No MaxMind database exists, starting download...');
+			throw new Exception('No MaxMind database exists.');
 		}
-
-		if (self::dbShouldUpdate())
-			self::dbQueueDownload();
 
 		try
 		{
